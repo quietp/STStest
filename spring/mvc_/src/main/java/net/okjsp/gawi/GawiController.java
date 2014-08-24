@@ -1,5 +1,6 @@
 package net.okjsp.gawi;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -10,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class GawiController {
 	
+	@Autowired
+	GameService gameService; 
+	
 	@RequestMapping(value="/gawi.do", method=RequestMethod.GET)
 	public String gawi(Model model) {
 		return "gawi";
@@ -17,11 +21,7 @@ public class GawiController {
 
 	@RequestMapping(value="/query.do", method=RequestMethod.POST)
 	public String queryJSON(Model model, @ModelAttribute("game") Game game, @RequestParam("callback") String callback) {
-		Play play = new Play();
-		
-		game.setComputerChoice(play.getComputerChoice());
-		game.setJudgement(play.judge(game.getChoice(), game.getComputerChoice()));
-		play.save(game.getChoice(), game.getComputerChoice(), game.getJudgement());
+		Play play = gameService.play(game);
 		Stat stat  = play.getStat();
 		
 		model.addAttribute("game", game);
@@ -29,7 +29,7 @@ public class GawiController {
 		
 		return "queryJSON";
 	}
-	
+
 	@RequestMapping(value="/stat.do", method=RequestMethod.GET)
 	public String statJSON(Model model) {
 		return "statJSON";
